@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -6,66 +6,281 @@
 <title>幸运大抽奖</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow:hidden}
-.container{text-align:center;padding:20px}
-h1{color:#fff;font-size:2.5em;margin-bottom:30px;text-shadow:0 2px 10px rgba(0,0,0,.3)}
-.machine{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:20px;padding:30px;display:inline-block;box-shadow:0 8px 32px rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.2)}
-.reels{display:flex;gap:15px;justify-content:center;margin:20px 0}
-.reel{width:100px;height:120px;background:#fff;border-radius:10px;overflow:hidden;position:relative;box-shadow:0 4px 15px rgba(0,0,0,.3)}
-.reel-inner{position:absolute;width:100%;transition:top 3s cubic-bezier(0.2,0.8,0.3,1)}
-.reel-item{width:100%;height:120px;display:flex;align-items:center;justify-content:center;padding:5px}
-.reel-item img{width:90px;height:90px;object-fit:contain;border-radius:8px}
-.lever{width:80px;height:80px;background:linear-gradient(145deg,#ffd700,#ff8c00);border-radius:50%;border:4px solid #fff;cursor:pointer;margin:20px auto 0;font-size:1.1em;color:#fff;font-weight:bold;transition:transform .1s;box-shadow:0 4px 15px rgba(0,0,0,.3);display:block}
-.lever:active{transform:scale(.95)}
-.lever:disabled{opacity:.6;cursor:not-allowed}
-.status{color:#fff;margin-top:15px;font-size:1.1em;min-height:1.5em}
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:none;justify-content:center;align-items:center;z-index:100}
-.modal.show{display:flex}
-.modal-content{background:#fff;border-radius:20px;padding:40px;max-width:400px;width:90%;text-align:center;animation:popIn .3s ease}
-@keyframes popIn{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
-.prize-img{max-width:200px;max-height:200px;border-radius:12px;margin:15px 0;object-fit:contain}
-.btn{display:inline-block;padding:12px 30px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;text-decoration:none;border-radius:25px;margin:5px;font-weight:500;transition:transform .2s;cursor:pointer;border:none;font-size:1em}
-.btn:hover{transform:translateY(-2px)}
-.btn-secondary{background:#f0f0f0;color:#333}
-.confetti{position:fixed;width:10px;height:10px;background:#f00;animation:fall 3s linear forwards;z-index:99}
-@keyframes fall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.qrcode{max-width:180px;border-radius:10px;margin:10px 0}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;justify-content:center;align-items:center;overflow-x:hidden}
+.container{text-align:center;padding:20px;max-width:480px;width:100%}
+h1{color:#fff;font-size:2em;margin-bottom:10px;text-shadow:0 2px 10px rgba(0,0,0,.3)}
+.subtitle{color:rgba(255,255,255,.7);font-size:.9em;margin-bottom:20px}
+.machine{background:rgba(255,255,255,.15);backdrop-filter:blur(10px);border-radius:20px;padding:25px 20px;box-shadow:0 8px 32px rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.2)}
+.reels-wrap{display:flex;gap:12px;justify-content:center;margin:15px 0;position:relative}
+.reel-frame{position:relative;width:110px;height:130px;background:linear-gradient(180deg,#2d1b4e,#1a0033);border-radius:12px;overflow:hidden;box-shadow:inset 0 0 20px rgba(0,0,0,.5),0 4px 15px rgba(0,0,0,.3)}
+.reel-frame::before,.reel-frame::after{content:'';position:absolute;left:0;width:100%;height:30px;z-index:2;pointer-events:none}
+.reel-frame::before{top:0;background:linear-gradient(180deg,rgba(45,27,78,.9),transparent)}
+.reel-frame::after{bottom:0;background:linear-gradient(0deg,rgba(45,27,78,.9),transparent)}
+.reel-inner{position:absolute;width:100%;transition:top .15s linear}
+.reel-inner.spinning{transition:none}
+.reel-item{width:100%;height:130px;display:flex;align-items:center;justify-content:center;padding:8px}
+.reel-item img{width:85px;height:85px;object-fit:contain;border-radius:8px;background:rgba(255,255,255,.05)}
+.reel-highlight{position:absolute;left:5px;right:5px;top:25px;bottom:25px;border:2px solid #ffd700;border-radius:8px;z-index:1;pointer-events:none;box-shadow:0 0 15px rgba(255,215,0,.4)}
+.spin-btn{width:90px;height:90px;background:linear-gradient(145deg,#ffd700,#ff8c00);border-radius:50%;border:4px solid #fff;cursor:pointer;margin:15px auto 0;font-size:1.1em;color:#fff;font-weight:bold;transition:transform .1s,box-shadow .3s;box-shadow:0 4px 15px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+.spin-btn:active:not(:disabled){transform:scale(.93)}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed}
+.spin-btn.ready{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 4px 15px rgba(0,0,0,.3)}50%{box-shadow:0 4px 30px rgba(255,215,0,.6)}}
+.status{color:#fff;margin-top:12px;font-size:1em;min-height:1.5em;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);display:none;justify-content:center;align-items:center;z-index:100;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-card{background:#fff;border-radius:20px;padding:35px 30px;max-width:380px;width:100%;text-align:center;animation:popIn .35s ease;position:relative;max-height:90vh;overflow-y:auto}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-icon{font-size:3em;margin-bottom:10px}
+.modal-title{font-size:1.4em;font-weight:700;color:#333;margin:8px 0}
+.modal-subtitle{color:#888;font-size:.9em;margin-bottom:15px}
+.prize-img{max-width:180px;max-height:180px;border-radius:12px;margin:12px 0;object-fit:contain}
+.prize-name{font-size:1.2em;font-weight:600;color:#764ba2;margin:5px 0}
+/* Step 2: teacher info */
+.teacher-card{background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:14px;padding:18px;margin:15px 0;text-align:left}
+.teacher-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.teacher-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:1.5em;color:#fff;flex-shrink:0}
+.teacher-info{flex:1}
+.teacher-name{font-weight:700;color:#333;font-size:1.05em}
+.teacher-role{font-size:.82em;color:#888;margin-top:2px}
+.teacher-tag{display:inline-block;background:#764ba2;color:#fff;border-radius:12px;padding:3px 10px;font-size:.75em;margin-top:4px}
+.teacher-desc{font-size:.82em;color:#666;margin:8px 0;line-height:1.5}
+/* Step 3: qrcode */
+.qrcode-img{max-width:220px;border-radius:14px;margin:15px 0;box-shadow:0 4px 15px rgba(0,0,0,.15)}
+.qrcode-tip{color:#ff6b6b;font-size:.85em;margin-bottom:5px;font-weight:500}
+/* Buttons */
+.btn{display:inline-block;padding:12px 35px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:25px;font-size:1em;font-weight:500;cursor:pointer;transition:transform .2s,box-shadow .2s;margin:5px 8px}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(102,126,234,.4)}
+.btn-outline{background:transparent;color:#764ba2;border:2px solid #764ba2}
+.btn-outline:hover{background:#764ba2;color:#fff}
+.btn-block{display:block;width:80%;margin:10px auto}
+/* Confetti */
+@keyframes confetti-fall{0%{transform:translateY(0) rotate(0deg);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+.confetti{position:fixed;width:10px;height:10px;animation:confetti-fall 3s linear forwards;z-index:99;pointer-events:none}
+/* Responsive */
+@media(max-width:420px){
+.reel-frame{width:90px;height:110px}
+.reel-item{height:110px}
+.reel-item img{width:70px;height:70px}
+.spin-btn{width:75px;height:75px;font-size:1em}
+h1{font-size:1.6em}
+}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>🎰 幸运大抽奖</h1>
+<p class="subtitle">转动转盘，赢取好礼</p>
 <div class="machine">
-<div class="reels">
-<div class="reel"><div class="reel-inner" id="reel1"></div></div>
-<div class="reel"><div class="reel-inner" id="reel2"></div></div>
-<div class="reel"><div class="reel-inner" id="reel3"></div></div>
+<div class="reels-wrap">
+<div class="reel-frame">
+<div class="reel-inner" id="reel0"></div>
+<div class="reel-highlight"></div>
 </div>
-<button class="lever" id="spinBtn" onclick="spin()">开始</button>
+<div class="reel-frame">
+<div class="reel-inner" id="reel1"></div>
+<div class="reel-highlight"></div>
+</div>
+<div class="reel-frame">
+<div class="reel-inner" id="reel2"></div>
+<div class="reel-highlight"></div>
+</div>
+</div>
+<button class="spin-btn ready" id="spinBtn" onclick="startSpin()">开始</button>
 <div class="status" id="status"></div>
 </div>
 </div>
-<div class="modal" id="resultModal">
-<div class="modal-content">
-<h2 id="resultTitle">🎉 恭喜你！</h2>
-<img class="prize-img" id="prizeImg" src="" alt="奖品">
-<p id="prizeName"></p>
-<img class="qrcode" src="qrcode.jpg" alt="扫码领奖">
-<p style="color:#666;font-size:.9em">截图保存，扫码联系客服领奖</p>
-<button class="btn" onclick="closeModal()">确定</button>
+
+<!-- Multi-step Modal -->
+<div class="modal-overlay" id="modal">
+<div class="modal-card" id="modalContent"></div>
 </div>
-</div>
+
 <script>
-const PRIZES=[{"id":1,"name":"AI工具包","prob":1,"image":"prizes/ai-tool.jpg"},{"id":2,"name":"免单","prob":0,"image":"prizes/free-order.jpg"},{"id":3,"name":"小米手机","prob":0,"image":"prizes/xiaomi-phone.jpg"},{"id":4,"name":"蒸汽锅","prob":0,"image":"prizes/steam-pot.jpg"}];
+// Prize config - load from config.json if available, else fallback
+let PRIZES;
 let spinning=false,hasSpun=false;
-function initReels(){const items=PRIZES.map(p=>'<div class="reel-item"><img src="'+p.image+'" alt="'+p.name+'"></div>').join('');['reel1','reel2','reel3'].forEach(id=>document.getElementById(id).innerHTML=items.repeat(3))}
-function spin(){if(spinning)return;spinning=true;document.getElementById('spinBtn').disabled=true;document.getElementById('status').textContent='抽奖中...';const winner=selectWinner();animateReels(winner.id-1)}
-function selectWinner(){const r=Math.random();let cum=0;for(const p of PRIZES){cum+=p.prob/100;if(r<=cum)return p}return PRIZES[0]}
-function animateReels(winnerIdx){const reels=['reel1','reel2','reel3'],stops=[winnerIdx,winnerIdx,winnerIdx];reels.forEach((id,i)=>{const reel=document.getElementById(id),itemH=120,totalItems=PRIZES.length*3,spins=5+Math.floor(Math.random()*3),finalPos=(spins*totalItems+stops[i])*itemH+60;reel.style.transition='top 3s cubic-bezier(0.2,0.8,0.3,1)';reel.style.top='-'+finalPos+'px'});setTimeout(()=>showResult(PRIZES[winnerIdx]),3200)}
-function showResult(prize){document.getElementById('resultTitle').textContent='🎉 恭喜你抽中';document.getElementById('prizeImg').src=prize.image;document.getElementById('prizeName').textContent=prize.name;document.getElementById('resultModal').classList.add('show');createConfetti();spinning=false;hasSpun=true;document.getElementById('spinBtn').disabled=false;document.getElementById('status').textContent=''}
-function closeModal(){document.getElementById('resultModal').classList.remove('show')}
-function createConfetti(){for(let i=0;i<50;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background='hsl('+Math.random()*360+',100%,50%)';c.style.animationDuration=(Math.random()*2+2)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),4000)}}
+const SPIN_DURATION=4000; // ms
+const REEL_COUNT=3;
+let reelPositions=[0,0,0];
+
+// Init: try fetch config, fallback to embedded
+(async function init(){
+try{
+const resp=await fetch('config.json?t='+Date.now());
+if(resp.ok){
+const cfg=await resp.json();
+PRIZES=cfg.prizes;
+}
+}catch(e){}
+if(!PRIZES||!PRIZES.length){
+PRIZES=[
+{"id":1,"name":"AI工具包","prob":1,"image":"prizes/ai-tool.jpg"},
+{"id":2,"name":"免单","prob":0,"image":"prizes/free-order.jpg"},
+{"id":3,"name":"小米手机","prob":0,"image":"prizes/xiaomi-phone.jpg"},
+{"id":4,"name":"蒸汽锅","prob":0,"image":"prizes/steam-pot.jpg"}
+];
+}
+// Check if already spun (localStorage)
+if(localStorage.getItem('lottery_spun')==='1'){
+hasSpun=true;
+document.getElementById('spinBtn').disabled=true;
+document.getElementById('spinBtn').classList.remove('ready');
+document.getElementById('status').textContent='您已参与过抽奖';
+}
 initReels();
+})();
+
+function initReels(){
+const items=PRIZES.map(p=>
+'<div class="reel-item"><img src="'+p.image+'" alt="'+p.name+'" onerror="this.src=\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2280%22 height=%2280%22%3E%3Crect fill=%22%23ddd%22 width=%2280%22 height=%2280%22 rx=%228%22/%3E%3Ctext x=%2240%22 y=%2245%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22%3E'+encodeURIComponent(p.name)+'%3C/text%3E%3C/svg%3E'"></div>'
+).join('');
+// 5 copies for smooth infinite scroll feel
+const fullSet=items.repeat(5);
+for(let i=0;i<REEL_COUNT;i++){
+const reel=document.getElementById('reel'+i);
+reel.innerHTML=fullSet;
+reel.style.top='0px';
+}
+}
+
+function startSpin(){
+if(spinning||hasSpun)return;
+if(localStorage.getItem('lottery_spun')==='1'){
+document.getElementById('status').textContent='您已参与过抽奖';
+return;
+}
+spinning=true;
+hasSpun=true;
+document.getElementById('spinBtn').disabled=true;
+document.getElementById('spinBtn').classList.remove('ready');
+document.getElementById('status').textContent='抽奖中...';
+
+// Pick random winner based on probability
+const winner=selectWinner();
+const winnerIdx=winner.id-1;
+
+// Staggered reel stops - each reel stops at different times
+animateReel(0,winnerIdx,0);
+animateReel(1,winnerIdx,400);
+animateReel(2,winnerIdx,800);
+
+// Show result after all reels stop
+setTimeout(()=>{
+spinning=false;
+document.getElementById('status').textContent='';
+showResult(winner);
+},SPIN_DURATION+1000);
+}
+
+function selectWinner(){
+const r=Math.random();
+let cum=0;
+for(const p of PRIZES){
+cum+=p.prob/100;
+if(r<=cum)return p;
+}
+return PRIZES[0];
+}
+
+function animateReel(idx,winIdx,delay){
+setTimeout(()=>{
+const reel=document.getElementById('reel'+idx);
+const itemH=130;
+// Total items: PRIZES.length * 5 copies = N*5
+const totalItems=PRIZES.length*5;
+// Random extra spins for variety
+const extraSpins=2+Math.floor(Math.random()*3);
+// Add offset to make winner appear near center
+const winOffset=winIdx+Math.floor(Math.random()*PRIZES.length)*(extraSpins%PRIZES.length+1);
+const targetIdx=winOffset+PRIZES.length*3;
+const targetPos=targetIdx*itemH-itemH/2;
+
+// Fast spin animation
+reel.style.transition='top '+((SPIN_DURATION-delay)/1000)+'s cubic-bezier(0.12,0.65,0.22,1)';
+reel.style.top='-'+targetPos+'px';
+},delay);
+}
+
+function showResult(prize){
+// Step 1: Show prize result
+document.getElementById('modal').classList.add('show');
+document.getElementById('modalContent').innerHTML=
+'<div class="modal-icon">🎉</div>'+
+'<div class="modal-title">恭喜你抽中</div>'+
+'<img class="prize-img" src="'+prize.image+'" alt="'+prize.name+'" onerror="this.style.display=\'none\'">'+
+'<div class="prize-name">'+prize.name+'</div>'+
+'<button class="btn btn-block" onclick="showTeacherStep()">查看领奖方式 →</button>';
+createConfetti();
+}
+
+function showTeacherStep(){
+// Step 2: Prompt to add teacher
+document.getElementById('modalContent').innerHTML=
+'<div class="modal-icon">👨‍🏫</div>'+
+'<div class="modal-title">请先添加实操老师</div>'+
+'<div class="modal-subtitle">添加老师微信，验证后领取奖品</div>'+
+'<div class="teacher-card">'+
+'<div class="teacher-row">'+
+'<div class="teacher-avatar">🐲</div>'+
+'<div class="teacher-info">'+
+'<div class="teacher-name">毛毛老师 · 特级班班</div>'+
+'<div class="teacher-role">蜻蜓生涯AI</div>'+
+'</div>'+
+'</div>'+
+'<div class="teacher-tag">特级运营实操师</div>'+
+'<div class="teacher-desc">添加老师后发送中奖截图，老师会帮你核对并发放奖品 🎁</div>'+
+'</div>'+
+'<button class="btn btn-block" onclick="showQrcode()">查看老师名片 →</button>'+
+'<button class="btn btn-outline btn-block" onclick="closeAllModals()">我知道了</button>';
+}
+
+function showQrcode(){
+// Step 3: Show WeChat Work business card
+document.getElementById('modalContent').innerHTML=
+'<div class="modal-icon">📱</div>'+
+'<div class="modal-title">扫码添加老师</div>'+
+'<img class="qrcode-img" src="qrcode.jpg" alt="毛毛老师企业微信">'+
+'<div class="qrcode-tip">⚠️ 截图保存！</div>'+
+'<div class="modal-subtitle">打开微信 → 扫一扫 → 添加好友</div>'+
+'<div class="prize-name" style="font-size:.9em">添加时备注：抽奖中奖</div>'+
+'<button class="btn btn-block" onclick="closeAllModals()">我记下了 ✅</button>'+
+'<button class="btn btn-outline btn-block" onclick="goBackStep()">← 返回</button>';
+}
+
+function goBackStep(){
+showTeacherStep();
+}
+
+function closeAllModals(){
+document.getElementById('modal').classList.remove('show');
+// Save spun state
+localStorage.setItem('lottery_spun','1');
+document.getElementById('spinBtn').disabled=true;
+document.getElementById('spinBtn').classList.remove('ready');
+document.getElementById('status').textContent='奖品领取中，请联系老师';
+}
+
+function createConfetti(){
+const colors=['#ffd700','#ff6b6b','#51cf66','#667eea','#ff922b','#cc5de8','#20c997'];
+for(let i=0;i<80;i++){
+setTimeout(()=>{
+const c=document.createElement('div');
+c.className='confetti';
+c.style.left=Math.random()*100+'vw';
+c.style.top='-10px';
+c.style.width=(6+Math.random()*8)+'px';
+c.style.height=(6+Math.random()*8)+'px';
+c.style.background=colors[Math.floor(Math.random()*colors.length)];
+c.style.borderRadius=Math.random()>.5?'50%':'2px';
+c.style.animationDuration=(2+Math.random()*2.5)+'s';
+c.style.animationDelay=Math.random()*.3+'s';
+document.body.appendChild(c);
+setTimeout(()=>c.remove(),3500);
+},i*15);
+}
+}
 </script>
 </body>
 </html>
