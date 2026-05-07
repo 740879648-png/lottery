@@ -1,0 +1,89 @@
+ï»¿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>抽奖管理后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;min-height:100vh;padding:40px 20px}
+.panel{background:#fff;border-radius:12px;padding:30px;max-width:600px;margin:0 auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+h1{color:#333;font-size:1.5em;margin-bottom:25px;padding-bottom:15px;border-bottom:2px solid #667eea}
+.row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid #eee}
+.row:last-child{border-bottom:none}
+.lbl{font-size:1em;color:#555}
+.toggle{position:relative;width:52px;height:28px;cursor:pointer}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#ccc;border-radius:28px;transition:.3s}
+.slider:before{content:"";position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:.3s}
+.toggle input:checked+.slider{background:#667eea}
+.toggle input:checked+.slider:before{transform:translateX(24px)}
+.prize-row{display:flex;align-items:center;gap:10px;padding:10px 0}
+.prize-row img{width:50px;height:50px;object-fit:cover;border-radius:8px}
+.prize-info{flex:1}
+.prize-name{font-weight:bold;color:#333}
+.prize-prob{color:#888;font-size:.85em}
+.prob-slider{width:120px}
+.btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:1em;cursor:pointer;margin-top:20px;font-weight:bold}
+.btn:hover{opacity:.9}
+.msg{padding:10px;border-radius:8px;margin-bottom:20px;text-align:center}
+.msg.ok{background:#d4edda;color:#155724}
+.msg.err{background:#f8d7da;color:#721c24}
+</style>
+</head>
+<body>
+<div class="panel">
+<h1>🎰 抽奖管理后台</h1>
+<div id="msg"></div>
+<div class="row">
+<span class="lbl">开启抽奖</span>
+<label class="toggle">
+<input type="checkbox" id="lotteryEnabled" onchange="save()">
+<span class="slider"></span>
+</label>
+</div>
+<div id="prizeList"></div>
+<button class="btn" onclick="resetLocal()">重置本地抽奖记录</button>
+<p style="color:#999;font-size:.85em;margin-top:15px;text-align:center">修改实时生效，数据存在本地浏览器</p>
+</div>
+<script>
+var BASE = "https://740879648-png.github.io/lottery/";
+var prizes, enabled;
+async function load() {
+  try {
+    var cfg = await fetch(BASE + "config.json?t=" + Date.now()).then(function(r){ return r.json(); });
+    prizes = cfg.prizes;
+    enabled = cfg.lotteryEnabled !== false;
+    document.getElementById("lotteryEnabled").checked = enabled;
+    render();
+  } catch(e) { showMsg(e.message, "err"); }
+}
+function render() {
+  document.getElementById("prizeList").innerHTML = prizes.map(function(p) {
+    return '<div class="prize-row"><img src="'+BASE+p.image+'" alt="'+p.name+'"><div class="prize-info"><div class="prize-name">'+p.name+'</div><div class="prize-prob">概率: <b>'+p.prob+'%</b></div></div><input class="prob-slider" type="range" min="0" max="100" value="'+p.prob+'" onchange="p.prob=+this.value;saveLocal()"><span style="width:30px;text-align:right">'+p.prob+'%</span></div>';
+  }).join("");
+}
+function save() {
+  enabled = document.getElementById("lotteryEnabled").checked;
+  showMsg("配置已保存（本地）", "ok");
+}
+function saveLocal() {
+  prizes.forEach(function(p){ if(p.prob<0)p.prob=0; if(p.prob>100)p.prob=100; });
+  localStorage.setItem("admin_prizes", JSON.stringify(prizes));
+  localStorage.setItem("admin_enabled", enabled);
+  render();
+  showMsg("已保存到本地", "ok");
+}
+function resetLocal() {
+  localStorage.removeItem("lottery_v1_drawn");
+  showMsg("已重置，用户可重新抽奖", "ok");
+}
+function showMsg(t, c) {
+  document.getElementById("msg").className = "msg " + c;
+  document.getElementById("msg").textContent = t;
+  setTimeout(function(){ document.getElementById("msg").textContent = ""; }, 3000);
+}
+load();
+</script>
+</body>
+</html>
