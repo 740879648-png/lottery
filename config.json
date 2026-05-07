@@ -4,13 +4,13 @@
   "prizes": [
     {
       "id": 1,
-      "name": "AI工具卅",
+      "name": "AI工具包",
       "prob": 1,
       "image": "prizes/ai-tool.jpg"
     },
     {
       "id": 2,
-      "name": "卍单",
+      "name": "免单",
       "prob": 0,
       "image": "prizes/free-order.jpg"
     },
