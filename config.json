@@ -1,0 +1,30 @@
+{
+  "baseUrl": "https://740879648-png.github.io/lottery/",
+  "lotteryEnabled": true,
+  "prizes": [
+    {
+      "id": 1,
+      "name": "AI工具卅",
+      "prob": 1,
+      "image": "prizes/ai-tool.jpg"
+    },
+    {
+      "id": 2,
+      "name": "卍单",
+      "prob": 0,
+      "image": "prizes/free-order.jpg"
+    },
+    {
+      "id": 3,
+      "name": "小米手机",
+      "prob": 0,
+      "image": "prizes/xiaomi-phone.jpg"
+    },
+    {
+      "id": 4,
+      "name": "蒸汽锅",
+      "prob": 0,
+      "image": "prizes/steam-pot.jpg"
+    }
+  ]
+}
